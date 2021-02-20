@@ -10,13 +10,30 @@ interface AppProps {
   deleteTodo: typeof deleteTodo;
 }
 
-class _App extends Component<AppProps> {
+interface AppState {
+  fetching: boolean;
+}
+
+class _App extends Component<AppProps, AppState> {
+  constructor(props: AppProps) {
+    super(props);
+
+    this.state = { fetching: false };
+  }
+
+  componentDidUpdate(prevProps: AppProps): void {
+    if (!prevProps.todos.length && this.props.todos.length) {
+      this.setState({ fetching: false });
+    }
+  }
+
   onTodoClick = (id: number): void => {
     this.props.deleteTodo(id);
   };
 
   onBtnClick = (): void => {
     this.props.fetchTodos();
+    this.setState({ fetching: true });
   };
   renderList(): JSX.Element[] {
     return this.props.todos.map((todo: Todo) => {
@@ -31,6 +48,7 @@ class _App extends Component<AppProps> {
     return (
       <div>
         <button onClick={this.onBtnClick}>Fetch Todos</button>
+        {this.state.fetching ? ' Loading... ' : ''}
         {this.renderList()}
       </div>
     );
